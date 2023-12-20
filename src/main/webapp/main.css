@@ -1,0 +1,28 @@
+html, body {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+#header {
+	width: 100%;
+	margin: 0 0 10px 0;
+	background-color: rgb(21, 111, 48);
+	color: white;
+	box-shadow: 3px 3px 5px 5px lightgray;
+	line-height: 50px;
+	height: 60px;
+	padding: 5px 15px;
+	font-size: 30px;
+}
+
+#logo {
+	float: left;
+	height: 60px;
+	width: 60px;
+	text-align: center;
+	vertical-align: center;
+	color: white;
+	font-weight: bold;
+	font-size: 45px;
+}
