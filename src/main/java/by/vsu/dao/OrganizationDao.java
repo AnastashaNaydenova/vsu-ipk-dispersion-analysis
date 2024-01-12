@@ -2,6 +2,10 @@ package by.vsu.dao;
 
 import by.vsu.domain.Organization;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 public class OrganizationDao {
@@ -13,8 +17,30 @@ public class OrganizationDao {
 		organizations.put(89, build(89, "Возрождение", true, 45.67));
 	}
 
-	public static List<Organization> readAll() {
-		return new ArrayList<>(organizations.values());
+	public static List<Organization> readAll() throws SQLException, ClassNotFoundException {
+		String sql = "SELECT \"id\", \"name\" , \"individual\", \"area\" FROM \"organization\"";
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet resultSet = null;
+		try {
+			connection = DatabaseConnector.getConnection();
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(sql);
+			List<Organization> organizations = new ArrayList<>();
+			while(resultSet.next()) {
+				Organization organization = new Organization();
+				organization.setId(resultSet.getInt("id"));
+				organization.setName(resultSet.getString("name"));
+				organization.setIndividual(resultSet.getBoolean("individual"));
+				organization.setArea(resultSet.getDouble("area"));
+				organizations.add(organization);
+			}
+			return organizations;
+		} finally {
+			try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
+		}
 	}
 
 	public static Organization read(Integer id) {
