@@ -1,7 +1,7 @@
 window.addEventListener("load", function() {
 	let a = document.getElementById('open-button');
 	a.addEventListener("click", async function () {
-		let response = await fetch('http://localhost/vida/organization');
+		let response = await fetch('/vida/organization');
 		let organizations = await response.json();
 		let html = '<table style="border-collapse: collapse">';
 		html += '<tr>';
