@@ -26,3 +26,19 @@ html, body {
 	font-weight: bold;
 	font-size: 45px;
 }
+
+table {
+	border-collapse: collapse;
+}
+
+th, td {
+	border: 1px solid green;
+}
+
+.control {
+	margin-bottom: 20px;
+}
+
+.control label, .control input[type="text"] {
+	display: block;
+}

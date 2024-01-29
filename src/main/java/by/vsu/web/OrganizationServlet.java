@@ -18,12 +18,30 @@ public class OrganizationServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			List<Organization> organizations = OrganizationDao.readAll();
-			resp.setStatus(200);
-			resp.setContentType("application/json");
-			resp.setCharacterEncoding("UTF-8");
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.writeValue(resp.getWriter(), organizations);
+			String id = req.getParameter("id");
+			if(id != null) {
+				try {
+					Organization organization = OrganizationDao.read(Integer.valueOf(id));
+					if(organization != null) {
+						resp.setStatus(200);
+						resp.setContentType("application/json");
+						resp.setCharacterEncoding("UTF-8");
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writeValue(resp.getWriter(), organization);
+					} else {
+						throw new IllegalArgumentException();
+					}
+				} catch(IllegalArgumentException e) {
+					resp.sendError(404);
+				}
+			} else {
+				List<Organization> organizations = OrganizationDao.readAll();
+				resp.setStatus(200);
+				resp.setContentType("application/json");
+				resp.setCharacterEncoding("UTF-8");
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.writeValue(resp.getWriter(), organizations);
+			}
 		} catch(SQLException | ClassNotFoundException e) {
 			throw new ServletException(e);
 		}
