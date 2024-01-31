@@ -2,7 +2,6 @@ package by.vsu.domain;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class Task {
 	private Integer id;
@@ -12,7 +11,7 @@ public class Task {
 	private Organization organization;
 	private Property property;
 	private Factor factor;
-	private List<Map<FactorValue, Data>> data;
+	private List<Data> data;
 
 	public Integer getId() {
 		return id;
@@ -70,11 +69,11 @@ public class Task {
 		this.factor = factor;
 	}
 
-	public List<Map<FactorValue, Data>> getData() {
+	public List<Data> getData() {
 		return data;
 	}
 
-	public void setData(List<Map<FactorValue, Data>> data) {
+	public void setData(List<Data> data) {
 		this.data = data;
 	}
 }
