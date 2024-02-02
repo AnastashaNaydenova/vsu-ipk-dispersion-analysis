@@ -75,14 +75,23 @@ public class UsernameDao {
                 username.setGroup(resultSet.getInt("group"));
                 username.setLogin(resultSet.getString("login"));
                 username.setPassword(resultSet.getString("password"));
+            }
+            return username;
+        } finally {
+            try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
+            try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+            try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
         }
-        return username;
-    } finally {
-        try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
-        try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
-        try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
     }
-}
+
+    public static Username readByLoginAndPassword(String login, String password) {
+        for(Username username : usernames.values()) {
+            if(username.getLogin().equals(login) && username.getPassword().equals(password)) {
+                return username;
+            }
+        }
+        return null;
+    }
 
     public static void create(Username username) {
         int newId = 1;
