@@ -2,6 +2,7 @@ package by.vsu.web;
 
 import by.vsu.dao.PropertyDao;
 import by.vsu.domain.Property;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.servlet.annotation.WebServlet;
@@ -25,6 +26,7 @@ public class PropertyServlet extends HttpServlet {
 					resp.setContentType("application/json");
 					resp.setCharacterEncoding("UTF-8");
 					ObjectMapper mapper = new ObjectMapper();
+					mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 					mapper.writeValue(resp.getWriter(), property);
 				} else {
 					throw new IllegalArgumentException();
@@ -39,6 +41,7 @@ public class PropertyServlet extends HttpServlet {
 				resp.setContentType("application/json");
 				resp.setCharacterEncoding("UTF-8");
 				ObjectMapper mapper = new ObjectMapper();
+				mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 				mapper.writeValue(resp.getWriter(), properties);
 			} catch(NumberFormatException e) {
 				resp.sendError(404);
