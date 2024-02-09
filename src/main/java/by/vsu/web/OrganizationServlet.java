@@ -48,30 +48,38 @@ public class OrganizationServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		Organization organization = mapper.readValue(req.getInputStream(), Organization.class);
-		if(organization.getId() != null) {
-			OrganizationDao.update(organization);
-			resp.setStatus(204);
-		} else {
-			OrganizationDao.create(organization);
-			resp.setStatus(201);
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			Organization organization = mapper.readValue(req.getInputStream(), Organization.class);
+			if(organization.getId() != null) {
+				OrganizationDao.update(organization);
+				resp.setStatus(204);
+			} else {
+				OrganizationDao.create(organization);
+				resp.setStatus(201);
+			}
+		} catch(SQLException | ClassNotFoundException e) {
+			throw new ServletException(e);
 		}
 	}
 
 	@Override
-	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		String id = req.getParameter("id");
-		if(id != null) {
-			try {
-				OrganizationDao.delete(Integer.valueOf(id));
-				resp.setStatus(204);
-			} catch(IllegalArgumentException e) {
-				resp.sendError(404);
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			String id = req.getParameter("id");
+			if(id != null) {
+				try {
+					OrganizationDao.delete(Integer.valueOf(id));
+					resp.setStatus(204);
+				} catch(IllegalArgumentException e) {
+					resp.sendError(404);
+				}
+			} else {
+				resp.sendError(400);
 			}
-		} else {
-			resp.sendError(400);
+		} catch(SQLException | ClassNotFoundException e) {
+			throw new ServletException(e);
 		}
 	}
 }

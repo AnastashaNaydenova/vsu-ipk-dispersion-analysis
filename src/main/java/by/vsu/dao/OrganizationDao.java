@@ -6,14 +6,6 @@ import java.sql.*;
 import java.util.*;
 
 public class OrganizationDao {
-	private static final Map<Integer, Organization> organizations = new HashMap<>();
-	static {
-		organizations.put(123, build(123, "Лесная поляна", true, 34.56));
-		organizations.put(45, build(45, "Заря коммунизма", false, 123.45));
-		organizations.put(67, build(67, "Мазолово", false, 234.56));
-		organizations.put(89, build(89, "Возрождение", true, 45.67));
-	}
-
 	public static List<Organization> readAll() throws SQLException, ClassNotFoundException {
 		String sql = "SELECT \"id\", \"name\" , \"individual\", \"area\" FROM \"organization\"";
 		Connection connection = null;
@@ -66,31 +58,53 @@ public class OrganizationDao {
 		}
 	}
 
-	public static void create(Organization organization) {
-		int newId = 1;
-		if(organizations.keySet().isEmpty()) {
-			newId += Collections.max(organizations.keySet());
+	public static void create(Organization organization) throws SQLException, ClassNotFoundException {
+		String sql = "INSERT INTO \"organization\"(\"name\" , \"individual\", \"area\") VALUES (?, ?, ?)";
+		Connection connection = null;
+		PreparedStatement statement = null;
+		try {
+			connection = DatabaseConnector.getConnection();
+			statement = connection.prepareStatement(sql);
+			statement.setString(1, organization.getName());
+			statement.setBoolean(2, organization.isIndividual());
+			statement.setDouble(3, organization.getArea());
+			statement.executeUpdate();
+		} finally {
+			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
 		}
-		organization.setId(newId);
-		organizations.put(newId, organization);
 	}
 
-	public static void update(Organization organization) {
-		if(organizations.containsKey(organization.getId())) {
-			organizations.put(organization.getId(), organization);
+	public static void update(Organization organization) throws SQLException, ClassNotFoundException {
+		String sql = "UPDATE \"organization\" SET \"name\" = ?, \"individual\" = ?, \"area\" = ? WHERE \"id\" = ?";
+		Connection connection = null;
+		PreparedStatement statement = null;
+		try {
+			connection = DatabaseConnector.getConnection();
+			statement = connection.prepareStatement(sql);
+			statement.setString(1, organization.getName());
+			statement.setBoolean(2, organization.isIndividual());
+			statement.setDouble(3, organization.getArea());
+			statement.setInt(4, organization.getId());
+			statement.executeUpdate();
+		} finally {
+			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
 		}
 	}
 
-	public static void delete(Integer id) {
-		organizations.remove(id);
-	}
-
-	private static Organization build(Integer id, String name, boolean individual, Double area) {
-		Organization organization = new Organization();
-		organization.setId(id);
-		organization.setName(name);
-		organization.setIndividual(individual);
-		organization.setArea(area);
-		return organization;
+	public static void delete(Integer id) throws SQLException, ClassNotFoundException {
+		String sql = "DELETE FROM \"organization\" WHERE \"id\" = ?";
+		Connection connection = null;
+		PreparedStatement statement = null;
+		try {
+			connection = DatabaseConnector.getConnection();
+			statement = connection.prepareStatement(sql);
+			statement.setInt(1, id);
+			statement.executeUpdate();
+		} finally {
+			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
+		}
 	}
 }

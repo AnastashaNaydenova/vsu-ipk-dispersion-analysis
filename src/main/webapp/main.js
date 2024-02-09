@@ -1,26 +1,84 @@
+async function saveForm(event) {
+	event.preventDefault();
+	let organization = {};
+	if(this['id']) {
+		organization.id = parseInt(this['id'].value);
+	}
+	organization.name = this['name'].value;
+	organization.individual = this['individual'].checked;
+	organization.area = parseFloat(this['area'].value);
+	await fetch('/vida/organization', {
+		method: 'POST',
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(organization),
+	});
+	await loadList();
+}
+
 async function loadEditForm() {
-	let organization = null;
+	let organization;
 	if(this.organizationId) {
 		let response = await fetch('/vida/organization?id=' + this.organizationId);
 		organization = await response.json();
 	} else {
 		organization = {name: '', individual: false, area: ''};
 	}
-	let html = '<form>';
-	html += '<div class="control">';
-	html += '<label>Название</label>';
-	html += `<input type="text" name="name" value="${organization.name}">`;
-	html += '</div>';
-	html += '<div class="control">';
-	html += `<label><input type="checkbox" name="individual" value="individual" ${organization.individual ? 'checked' : ''}> Является ли частным</label>`;
-	html += '</div>';
-	html += '<div class="control">';
-	html += '<label>Площадь (Га)</label>';
-	html += `<input type="text" name="area" value="${organization.area}">`;
-	html += '</div>';
-	html += '</form>';
 	let div = document.getElementById('container');
-	div.innerHTML = html;
+	let form = document.createElement('form');
+	if(this.organizationId) {
+		let inputId = document.createElement('input');
+		inputId.type = 'hidden';
+		inputId.name = 'id';
+		inputId.value = this.organizationId;
+		form.appendChild(inputId);
+	}
+	let divName = document.createElement('div');
+	divName.className = 'control';
+	let labelName = document.createElement('label');
+	labelName.setAttribute('for', 'name');
+	labelName.appendChild(document.createTextNode('Название:'))
+	divName.appendChild(labelName);
+	let inputName = document.createElement('input');
+	inputName.type = 'text';
+	inputName.id = 'name';
+	inputName.name = 'name';
+	inputName.value = organization.name;
+	divName.appendChild(inputName);
+	form.appendChild(divName);
+	let divIndividual = document.createElement('div');
+	divIndividual.className = 'control';
+	let labelIndividual = document.createElement('label');
+	let inputIndividual = document.createElement('input');
+	inputIndividual.type = 'checkbox';
+	inputIndividual.name = 'individual';
+	inputIndividual.value = 'individual';
+	inputIndividual.checked = organization.individual;
+	labelIndividual.appendChild(inputIndividual);
+	labelIndividual.appendChild(document.createTextNode(' Является ли частным предпринимателем'));
+	divIndividual.appendChild(labelIndividual);
+	form.appendChild(divIndividual);
+	let divArea = document.createElement('div');
+	divArea.className = 'control';
+	let labelArea = document.createElement('label');
+	labelArea.setAttribute('for', 'area');
+	labelArea.appendChild(document.createTextNode('Площадь (Га):'));
+	divArea.appendChild(labelArea);
+	let inputArea = document.createElement('input');
+	inputArea.type = 'text';
+	inputArea.id = 'area';
+	inputArea.name = 'area';
+	inputArea.value = organization.area;
+	divArea.appendChild(inputArea);
+	form.appendChild(divArea);
+	let buttonSend = document.createElement('button');
+	buttonSend.type = 'submit';
+	buttonSend.appendChild(document.createTextNode('Сохранить'));
+	form.appendChild(buttonSend);
+	form.addEventListener('submit', saveForm);
+	div.innerHTML = '';
+	div.appendChild(form);
 }
 
 async function loadList() {
@@ -29,9 +87,9 @@ async function loadList() {
 	let div = document.getElementById('container');
 	div.innerHTML = '';
 	let table = document.createElement('table');
-	let tr = null;
+	let tr;
 	tr = document.createElement('tr');
-	let th = null;
+	let th;
 	th = document.createElement('th');
 	th.appendChild(document.createTextNode('Название'));
 	tr.appendChild(th);
@@ -45,7 +103,7 @@ async function loadList() {
 	table.appendChild(tr);
 	organizations.forEach(function(organization) {
 		tr = document.createElement('tr');
-		let td = null;
+		let td;
 		td = document.createElement('td');
 		td.appendChild(document.createTextNode(organization.name));
 		tr.appendChild(td);
@@ -71,7 +129,4 @@ async function loadList() {
 	div.appendChild(button);
 }
 
-window.addEventListener("load", function() {
-	let a = document.getElementById('open-button');
-	a.addEventListener("click", loadList);
-});
+window.addEventListener("load", loadList);
