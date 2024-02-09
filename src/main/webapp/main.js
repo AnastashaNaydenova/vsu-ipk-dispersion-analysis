@@ -17,6 +17,11 @@ async function saveForm(event) {
 	await loadList();
 }
 
+async function deleteForm() {
+	await fetch('/vida/organization?id=' + this.organizationId, {method: 'DELETE'});
+	await loadList();
+}
+
 async function loadEditForm() {
 	let organization;
 	if(this.organizationId) {
@@ -77,6 +82,14 @@ async function loadEditForm() {
 	buttonSend.appendChild(document.createTextNode('Сохранить'));
 	form.appendChild(buttonSend);
 	form.addEventListener('submit', saveForm);
+	if(this.organizationId) {
+		let buttonDelete = document.createElement('button');
+		buttonDelete.type = 'button';
+		buttonDelete.organizationId = this.organizationId;
+		buttonDelete.appendChild(document.createTextNode('Удалить'));
+		buttonDelete.addEventListener('click', deleteForm);
+		form.appendChild(buttonDelete);
+	}
 	div.innerHTML = '';
 	div.appendChild(form);
 }
