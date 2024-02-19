@@ -12,6 +12,7 @@ public class Task {
 	private Property property;
 	private Factor factor;
 	private List<Data> data;
+	private Double veracity;
 
 	public Integer getId() {
 		return id;
@@ -75,5 +76,13 @@ public class Task {
 
 	public void setData(List<Data> data) {
 		this.data = data;
+	}
+
+	public Double getVeracity() {
+		return veracity;
+	}
+
+	public void setVeracity(Double veracity) {
+		this.veracity = veracity;
 	}
 }
