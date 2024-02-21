@@ -7,16 +7,9 @@ import java.util.*;
 
 
 public class UsernameDao {
-    private static final Map<Integer, Username> usernames = new HashMap<>();
-    static {
-        usernames.put(3, build(3, "Иван", "Иванов", "Иванович", "аспирант", 4,"abc", "123" ));
-        usernames.put(1, build(1, "Петр", "Петров", "Петрович", "аспирант", 5, "cba", "321"));
-        usernames.put(2, build(2, "Сергей", "Сергеев", "Сергеевич", "студент", 4, "xyz", "456"));
-        usernames.put(4, build(4, "Игорь", "Игорев", "Игоревич", "аспирант", 5, "zyx", "654"));
-    }
-
     public static List<Username> readAll() throws SQLException, ClassNotFoundException {
-        String sql = "SELECT \"id\", \"firstname\" , \"surname\", \"lostname\", \"status\", \"group\", \"login\", \"password\" FROM \"username\"";
+        String sql = "SELECT \"id\", \"firstname\" , \"surname\", \"lostname\", \"status\"," +
+                " \"group\", \"login\", \"password\" FROM \"username\"";
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
@@ -39,23 +32,15 @@ public class UsernameDao {
             }
             return usernames;
         } finally {
-            try {
-                Objects.requireNonNull(resultSet).close();
-            } catch (Exception ignored) {
-            }
-            try {
-                Objects.requireNonNull(statement).close();
-            } catch (Exception ignored) {
-            }
-            try {
-                Objects.requireNonNull(connection).close();
-            } catch (Exception ignored) {
-            }
+            try {Objects.requireNonNull(resultSet).close();} catch (Exception ignored) {}
+            try {Objects.requireNonNull(statement).close();} catch (Exception ignored) {}
+            try {Objects.requireNonNull(connection).close();} catch (Exception ignored) {}
         }
     }
 
     public static Username read(Integer id) throws SQLException, ClassNotFoundException {
-        String sql = "SELECT \"id\", \"firstname\" , \"surname\", \"lostname\", \"status\", \"group\", \"login\", \"password\" FROM \"username\" WHERE \"id\" = ?";
+        String sql = "SELECT \"id\", \"firstname\" , \"surname\", \"lostname\", \"status\", " +
+                "\"group\", \"login\", \"password\" FROM \"username\" WHERE \"id\" = ?";
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -84,47 +69,95 @@ public class UsernameDao {
         }
     }
 
-    public static Username readByLoginAndPassword(String login, String password) {
-        for(Username username : usernames.values()) {
-            if(username.getLogin().equals(login) && username.getPassword().equals(password)) {
-                return username;
+    public static Username readByLoginAndPassword(String login, String password) throws SQLException, ClassNotFoundException {
+        String sql = "SELECT \"id\", \"firstname\" , \"surname\", \"lostname\", \"status\", " +
+                "\"group\", \"login\", \"password\" FROM \"username\" WHERE \"login\" = ? AND \"password\" = ?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = DatabaseConnector.getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, login);
+            statement.setString(2, password);
+            resultSet = statement.executeQuery();
+            Username username = null;
+            if(resultSet.next()) {
+                username = new Username();
+                username.setId(resultSet.getInt("id"));
+                username.setFirstname(resultSet.getString("firstname"));
+                username.setSurname(resultSet.getString("surname"));
+                username.setLostname(resultSet.getString("lostname"));
+                username.setStatus(resultSet.getString("status"));
+                username.setGroup(resultSet.getInt("group"));
+                username.setLogin(resultSet.getString("login"));
+                username.setPassword(resultSet.getString("password"));
             }
+            return username;
+        } finally{
+            try {Objects.requireNonNull(resultSet).close();} catch (Exception ignored) {}
+            try {Objects.requireNonNull(statement).close();} catch (Exception ignored) {}
+            try {Objects.requireNonNull(connection).close();} catch (Exception ignored) {}
         }
-        return null;
-    }
+     }
 
-    public static void create(Username username) {
-        int newId = 1;
-        if(usernames.keySet().isEmpty()) {
-            newId += Collections.max(usernames.keySet());
+    public static void create(Username username) throws SQLException, ClassNotFoundException {
+        String sql = "INSERT INTO \"username\"(\"firstname\" , \"surname\", \"lostname\" ," +
+                " \"status\" , \"group\" , \"login\" , \"password\") VALUES (?, ?, ?)";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = DatabaseConnector.getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, username.getFirstname());
+            statement.setString(2, username.getSurname());
+            statement.setString(3, username.getLostname());
+            statement.setString(4, username.getStatus());
+            statement.setInt(5, username.getGroup());
+            statement.setString(6, username.getLogin());
+            statement.setString(7, username.getPassword());
+            statement.executeUpdate();
+        } finally {
+            try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+            try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
         }
-        username.setId(newId);
-        usernames.put(newId, username);
     }
 
-    public static void update(Username username) {
-        if(usernames.containsKey(username.getId())) {
-            usernames.put(username.getId(), username);
+    public static void update(Username username) throws SQLException, ClassNotFoundException {
+        String sql = "UPDATE \"username\" SET \"firstname\" = ?, \"surname\" = ?, \"lostname\" = ?, \"status\"= ?, " +
+                "\"group\" = ?, \"login\" = ?, \"password\" = ? WHERE \"id\" = ?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = DatabaseConnector.getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, username.getFirstname());
+            statement.setString(2, username.getSurname());
+            statement.setString(3, username.getLostname());
+            statement.setString(4, username.getStatus());
+            statement.setInt(5, username.getGroup());
+            statement.setString(6, username.getLogin());
+            statement.setString(7, username.getPassword());
+            statement.setInt(8, username.getId());
+            statement.executeUpdate();
+        } finally {
+            try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+            try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
         }
     }
 
-    public static void delete(Integer id) {
-        usernames.remove(id);
-    }
-
-    private static Username build(Integer id, String firstname,
-                                  String surname, String lostname,
-                                  String status, Integer group,
-                                  String login, String password) {
-        Username username = new Username();
-        username.setId(id);
-        username.setFirstname(firstname);
-        username.setSurname(surname);
-        username.setLostname(lostname);
-        username.setStatus(status);
-        username.setGroup(group);
-        username.setLogin(login);
-        username.setPassword(password);
-        return username;
+    public static void delete(Integer id) throws SQLException, ClassNotFoundException {
+        String sql = "DELETE FROM \"username\" WHERE \"id\" = ?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = DatabaseConnector.getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            statement.executeUpdate();
+        } finally {
+            try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+            try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
+        }
     }
 }
