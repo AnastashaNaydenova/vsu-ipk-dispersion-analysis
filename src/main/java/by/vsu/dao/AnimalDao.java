@@ -2,47 +2,102 @@ package by.vsu.dao;
 
 import by.vsu.domain.Animal;
 
+import java.sql.*;
 import java.util.*;
 
 public class AnimalDao {
-	private static final Map<Integer, Animal> animals = new HashMap<>();
-	static {
-		animals.put(1, build(1, "Коровы"));
-		animals.put(2, build(2, "Свиньи"));
-		animals.put(3, build(3, "Куры"));
-	}
-
-	public static List<Animal> readAll() {
-		return new ArrayList<>(animals.values());
-	}
-
-	public static Animal read(Integer id) {
-		return animals.get(id);
-	}
-
-	public static void create(Animal animal) {
-		int newId = 1;
-		if(animals.keySet().isEmpty()) {
-			newId += Collections.max(animals.keySet());
-		}
-		animal.setId(newId);
-		animals.put(newId, animal);
-	}
-
-	public static void update(Animal animal) {
-		if(animals.containsKey(animal.getId())) {
-			animals.put(animal.getId(), animal);
+	public static List<Animal> readAll() throws SQLException, ClassNotFoundException {
+		String sql = "SELECT \"id\", \"name\" FROM \"animal\"";
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet resultSet = null;
+		try {
+			connection = DatabaseConnector.getConnection();
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(sql);
+			List<Animal> animals = new ArrayList<>();
+			while(resultSet.next()) {
+				Animal animal = new Animal();
+				animal.setId(resultSet.getInt("id"));
+				animal.setName(resultSet.getString("name"));
+				animals.add(animal);
+			}
+			return animals;
+		} finally {
+			try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
 		}
 	}
 
-	public static void delete(Integer id) {
-		animals.remove(id);
+	public static Animal read(Integer id) throws SQLException, ClassNotFoundException {
+		String sql = "SELECT \"id\", \"name\" FROM \"animal\" WHERE \"id\" = ?";
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		try {
+			connection = DatabaseConnector.getConnection();
+			statement = connection.prepareStatement(sql);
+			statement.setInt(1, id);
+			resultSet = statement.executeQuery();
+			Animal animal = null;
+			if(resultSet.next()) {
+				animal = new Animal();
+				animal.setId(resultSet.getInt("id"));
+				animal.setName(resultSet.getString("name"));
+			}
+			return animal;
+		} finally {
+			try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
+		}
 	}
 
-	private static Animal build(Integer id, String name) {
-		Animal animal = new Animal();
-		animal.setId(id);
-		animal.setName(name);
-		return animal;
+	public static void create(Animal animal) throws SQLException, ClassNotFoundException {
+		String sql = "INSERT INTO \"animal\"(\"name\") VALUES (?)";
+		Connection connection = null;
+		PreparedStatement statement = null;
+		try {
+			connection = DatabaseConnector.getConnection();
+			statement = connection.prepareStatement(sql);
+			statement.setString(1, animal.getName());
+			statement.executeUpdate();
+		} finally {
+			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
+		}
+	}
+
+
+	public static void update(Animal animal) throws SQLException, ClassNotFoundException {
+		String sql = "UPDATE \"animal\" SET \"name\" = ? WHERE \"id\" = ?";
+		Connection connection = null;
+		PreparedStatement statement = null;
+		try {
+			connection = DatabaseConnector.getConnection();
+			statement = connection.prepareStatement(sql);
+			statement.setString(1, animal.getName());
+			statement.setInt(2, animal.getId());
+			statement.executeUpdate();
+		} finally {
+			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
+		}
+	}
+
+	public static void delete(Integer id) throws SQLException, ClassNotFoundException {
+		String sql = "DELETE FROM \"animal\" WHERE \"id\" = ?";
+		Connection connection = null;
+		PreparedStatement statement = null;
+		try {
+			connection = DatabaseConnector.getConnection();
+			statement = connection.prepareStatement(sql);
+			statement.setInt(1, id);
+			statement.executeUpdate();
+		} finally {
+			try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
+			try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
+		}
 	}
 }
