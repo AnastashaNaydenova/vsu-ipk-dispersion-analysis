@@ -12,7 +12,8 @@ public class Task {
 	private Property property;
 	private Factor factor;
 	private List<Data> data;
-	private Double veracity;
+	private Double influenceProportion;
+	private boolean veracity;
 
 	public Integer getId() {
 		return id;
@@ -78,11 +79,19 @@ public class Task {
 		this.data = data;
 	}
 
-	public Double getVeracity() {
+	public Double getInfluenceProportion() {
+		return influenceProportion;
+	}
+
+	public void setInfluenceProportion(Double influenceProportion) {
+		this.influenceProportion = influenceProportion;
+	}
+
+	public boolean isVeracity() {
 		return veracity;
 	}
 
-	public void setVeracity(Double veracity) {
+	public void setVeracity(boolean veracity) {
 		this.veracity = veracity;
 	}
 }
