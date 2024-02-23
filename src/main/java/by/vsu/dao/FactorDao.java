@@ -2,7 +2,6 @@ package by.vsu.dao;
 
 import by.vsu.domain.Animal;
 import by.vsu.domain.Factor;
-import by.vsu.domain.FactorValue;
 
 import java.sql.*;
 import java.util.*;
@@ -29,7 +28,7 @@ public class FactorDao {
                 factors.add(factor);
             }
             for(Factor factor : factors) {
-                factor.setValues(readByFactor(factor.getId()));
+                factor.setValues(FactorValueDao.readByFactor(factor.getId()));
             }
             return factors;
         } finally {
@@ -56,7 +55,7 @@ public class FactorDao {
                 factor.setName(resultSet.getString("name"));
                 factor.setAnimal(new Animal());
                 factor.getAnimal().setId(resultSet.getInt("animal_id"));
-                factor.setValues(readByFactor(factor.getId()));
+                factor.setValues(FactorValueDao.readByFactor(factor.getId()));
             }
             return factor;
         } finally {
@@ -113,29 +112,4 @@ public class FactorDao {
 			try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
 		}
 	}
-
-    private static List<FactorValue> readByFactor(Integer factorId) throws SQLException, ClassNotFoundException {
-        String sql = "SELECT \"id\", \"name\" FROM \"factor_value\" WHERE \"factor_id\" = ? ";
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        try {
-            connection = DatabaseConnector.getConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setInt(1, factorId);
-            resultSet = statement.executeQuery();
-            List<FactorValue> values = new ArrayList<>();
-            while(resultSet.next()) {
-                FactorValue value = new FactorValue();
-                value.setId(resultSet.getInt("id"));
-                value.setName(resultSet.getString("name"));
-                values.add(value);
-            }
-            return values;
-        } finally {
-            try { Objects.requireNonNull(resultSet).close(); } catch(Exception ignored) {}
-            try { Objects.requireNonNull(statement).close(); } catch(Exception ignored) {}
-            try { Objects.requireNonNull(connection).close(); } catch(Exception ignored) {}
-        }
-    }
 }
